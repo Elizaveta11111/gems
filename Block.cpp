@@ -27,8 +27,8 @@ void SimpleBlock::draw(QPainter* qp) {
   QPen pen;
   pen.setWidth(2);
   qp->setPen(pen);
-  qp->setBrush(color);
-  qp->drawRect(x, y, blockw, blockh);
+  qp->setBrush(this->getColor());
+  qp->drawRect(getX(), getY(), blockw, blockh);
 }
 
 void ColorBonusBlock::draw(QPainter* qp) {
@@ -36,17 +36,17 @@ void ColorBonusBlock::draw(QPainter* qp) {
   pen.setWidth(2);
   qp->setPen(pen);
   qp->setBrush(QColor("#000000"));
-  qp->drawRect(x, y, blockw, blockh);
-  qp->setBrush(color);
-  qp->drawRect(x + (blockw - sw)/2, y + (blockh - sh) / 2, sw, sh);
+  qp->drawRect(getX(), getY(), blockw, blockh);
+  qp->setBrush(this->getColor());
+  qp->drawRect(getX() + (blockw - sw)/2, getY() + (blockh - sh) / 2, sw, sh);
 }
 
 void AnimatedBlock::draw(QPainter* qp) {
   QPen pen;
   pen.setWidth(2);
   qp->setPen(pen);
-  qp->setBrush(color);
-  qp->drawRect(x, y, blockw, height);
+  qp->setBrush(this->getColor());
+  qp->drawRect(getX(), getY(), blockw, height);
   qp->setBrush(secondColor);
-  qp->drawRect(x, y + height, blockw, blockh - height);
+  qp->drawRect(getX(), getY() + height, blockw, blockh - height);
 }

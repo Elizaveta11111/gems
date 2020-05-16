@@ -7,12 +7,12 @@ void GridForBlocks::stop() {
   int i, j;
   for (i = 0; i < COLUMNS; i++)
     for (j = 0; j < ROWS + 1; j++)
-      grid[i][j]->dy = 0;
+      grid[i][j]->changeDY(0);
 }
 
 void GridForBlocks::moveY(int i, int j) {
   std::shared_ptr <Block> block = inPos(i, j);
-  block->y += block->dy;
+  block->changeY(block->getY() + block->getDY());
 }
 
 void GridForBlocks::fall(int row) {
@@ -25,8 +25,9 @@ void GridForBlocks::fall(int row) {
           grid[i][k] = grid[i][k - 1];
         grid[i][0] = temp;
         alive(i, -1);
-        grid[i][0]->color = colorColor(rand() % COLORS); //!
-        grid[i][0]->y = -blockh;
+        //grid[i][0]->color = colorColor(rand() % COLORS); //!
+        grid[i][0]->changeColor(colorColor(rand() % COLORS));
+        grid[i][0]->changeY(-blockh);
         j = -1;
       }
   stop();
@@ -81,7 +82,7 @@ void GridForBlocks::oneColor(int i, int j) {
 }
 
 void GridForBlocks::changedy(int i, int j) {
-  inPos(i, j)->dy = 1;
+  inPos(i, j)->changeDY(1);
 }
 
 GridForBlocks::GridForBlocks() {
@@ -90,16 +91,14 @@ GridForBlocks::GridForBlocks() {
     for (j = 0; j < ROWS + 1; j++) {
       std::shared_ptr<Block> temp(new SimpleBlock);
       grid[i][j] = temp;
-      grid[i][j]->x = i * blockw;
-      grid[i][j]->y = (j - 1) * blockh;
+      grid[i][j]->changeX(i * blockw);
+      grid[i][j]->changeY((j - 1) * blockh);
     }
   }
 }
 
 int GridForBlocks::check(int i, int j, int deep) {
   int kills = 1;
-  //if (deep == 2) 
-  //  return kills;
   dead(i, j);
   std::shared_ptr <Block> A = inPos(i, j);
   std::shared_ptr <Block> B;
@@ -107,7 +106,7 @@ int GridForBlocks::check(int i, int j, int deep) {
   int killedY;
   if (i + 1 < COLUMNS) {
     B = inPos(i + 1, j);
-    if (!B->isDead() && B->color == A->color) {
+    if (!B->isDead() && B->getColor() == A->getColor()) {
       if (deep == 0) {
         killedX = i + 1;
         killedY = j;
@@ -117,7 +116,7 @@ int GridForBlocks::check(int i, int j, int deep) {
   }
   if (i - 1 >= 0) {
     B = inPos(i - 1, j);
-    if (!B->isDead() && B->color == A->color) {
+    if (!B->isDead() && B->getColor() == A->getColor()) {
       if (deep == 0) {
         killedX = i - 1;
         killedY = j;
@@ -127,7 +126,7 @@ int GridForBlocks::check(int i, int j, int deep) {
   }
   if (j + 1 < ROWS) {
     B = inPos(i, j + 1);
-    if (!B->isDead() && B->color == A->color) {
+    if (!B->isDead() && B->getColor() == A->getColor()) {
       if (deep == 0) {
         killedX = i;
         killedY = j + 1;
@@ -137,7 +136,7 @@ int GridForBlocks::check(int i, int j, int deep) {
   }
   if (j - 1 >= 0) {
     B = inPos(i, j - 1);
-    if (!B->isDead() && B->color == A->color) {
+    if (!B->isDead() && B->getColor() == A->getColor()) {
       if (deep == 0) {
         killedX = i;
         killedY = j - 1;
@@ -161,23 +160,23 @@ int GridForBlocks::startSwap(int iA, int jA, int iB, int jB) {
   if (iA == iB) {
     to = blockh;
     if (jA < jB) {
-      blockA->dy = 1;
-      blockB->dy = -1;
+      blockA->changeDY(1);
+      blockB->changeDY(-1);
     }
     else {
-      blockA->dy = -1;
-      blockB->dy = 1;
+      blockA->changeDY(-1);
+      blockB->changeDY(1);
     }
   }
   else {
     to = blockw;
     if (iA < iB) {
-      blockA->dx = 1;
-      blockB->dx = -1;
+      blockA->changeDX(1);
+      blockB->changeDX(-1);
     }
     else {
-      blockA->dx = -1;
-      blockB->dx = 1;
+      blockA->changeDX(-1);
+      blockB->changeDX(1);
     }
   }
   return to;
@@ -186,16 +185,18 @@ int GridForBlocks::startSwap(int iA, int jA, int iB, int jB) {
 void GridForBlocks::stopSwap(int iA, int jA, int iB, int jB) {
   std::shared_ptr <Block> blockA = inPos(iA, jA);
   std::shared_ptr <Block> blockB = inPos(iB, jB);
-  blockA->dx = blockA->dy = 0;
-  blockB->dx = blockB->dy = 0;
+  blockA->changeDX(0);
+  blockA->changeDY(0);
+  blockB->changeDX(0);
+  blockB->changeDY(0);
   grid[iA][jA + 1] = blockB;
   grid[iB][jB + 1] = blockA;
 }
 
 void GridForBlocks::move(int i, int j) {
   std::shared_ptr <Block> block = inPos(i, j);
-  block->x += block->dx;
-  block->y += block->dy;
+  block->changeX(block->getX() + block->getDX());
+  block->changeY(block->getY() + block->getDY());
 }
 
 GridForBonuses::GridForBonuses() {

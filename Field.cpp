@@ -147,17 +147,17 @@ void Field::colorBonus(int i, int j) {
   int sx, sy;
   rx = randClose(i, COLUMNS - 1);
   ry = randClose(j, ROWS - 1);
-  bonuses->setBonus(rx, ry, colorNumber(blocks->inPos(i, j)->color));
+  bonuses->setBonus(rx, ry, colorNumber(blocks->inPos(i, j)->getColor()));
   do {
     tx = rand() % COLUMNS;
     ty = rand() % ROWS;
   } while (bonuses->areNeigbors(rx, ry, tx, ty));
-  bonuses->setBonus(tx, ty, colorNumber(blocks->inPos(i, j)->color));
+  bonuses->setBonus(tx, ty, colorNumber(blocks->inPos(i, j)->getColor()));
   do {
     sx = rand() % COLUMNS;
     sy = rand() % ROWS;
   } while (bonuses->areNeigbors(sx, sy, tx, ty) || bonuses->areNeigbors(rx, ry, sx, sy));
-  bonuses->setBonus(sx, sy, colorNumber(blocks->inPos(i, j)->color));
+  bonuses->setBonus(sx, sy, colorNumber(blocks->inPos(i, j)->getColor()));
 }
 
 void Field::bombBonus(int i, int j) {

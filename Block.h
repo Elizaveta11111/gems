@@ -25,35 +25,66 @@ class Block {
 public:
   Block();
   ~Block() {}
+  void changeX(int s) {
+    x = s;
+  }
+  int getX() const {
+    return x;
+  }
+  void changeY(int s) {
+    y = s;
+  }
+  int getY() const {
+    return y;
+  }
+  void changeDX(int s) {
+    dx = s;
+  }
+  int getDX() const {
+    return dx;
+  }
+  void changeDY(int s) {
+    dy = s;
+  }
+  int getDY() const {
+    return dy;
+  }
+  void changeColor(QColor s) {
+    color = s;
+  }
+  QColor getColor() const {
+    return color;
+  }
   int posX() {
     return x / blockw;
   }
   int posY() {
     return y / blockh;
   }
-  QColor color;
-  int dx;
-  int dy;
-  int x;
-  int y;
-  virtual void draw(QPainter*) = 0;
   virtual bool isDead() {
     return false;
   }
   virtual void animate(int i = 0) {
     y += 2 * dy;
   }
+  virtual void draw(QPainter*) = 0;
+private:
+  QColor color;
+  int dx;
+  int dy;
+  int y;
+  int x;
 };
 
 class SimpleBlock : public Block {
 public:
   ~SimpleBlock() {}
   SimpleBlock& operator=(const Block& obj) {
-    color = obj.color;
-    x = obj.x;
-    y = obj.y;
-    dx = obj.dx;
-    dy = obj.dy;
+    this->changeColor(obj.getColor());
+    this->changeX(obj.getX());
+    this->changeY(obj.getY());
+    this->changeDX(obj.getDX());
+    this->changeDY(obj.getDY());
     return *this;
   }
   void draw(QPainter*);
@@ -66,14 +97,12 @@ public:
     sw = 0;
   }
   ~ColorBonusBlock(){}
-  int sh;
-  int sw;
   ColorBonusBlock& operator=(const Block& obj) {
-    color = obj.color;
-    x = obj.x;
-    y = obj.y;
-    dx = obj.dx;
-    dy = obj.dy;
+    this->changeColor(obj.getColor());
+    this->changeX(obj.getX());
+    this->changeY(obj.getY());
+    this->changeDX(obj.getDX());
+    this->changeDY(obj.getDY());
     return *this;
   }
   void draw(QPainter*);
@@ -81,6 +110,9 @@ public:
     sh += blockh/i;
     sw += blockw/i;
   }
+private:
+  int sh;
+  int sw;
 };
 
 class AnimatedBlock : public Block {
@@ -89,22 +121,23 @@ public:
   ~AnimatedBlock(){}
   AnimatedBlock(QColor firstColor) : Block() {
     height = 0;
-    color = firstColor;
-    secondColor = color;
+    this->changeColor(firstColor);
+    secondColor = getColor();
   }
-  int height;
   AnimatedBlock& operator=(const Block& obj) {
-    secondColor = obj.color;
-    x = obj.x;
-    y = obj.y;
-    dx = obj.dx;
-    dy = obj.dy;
+    secondColor = obj.getColor();
+    this->changeX(obj.getX());
+    this->changeY(obj.getY());
+    this->changeDX(obj.getDX());
+    this->changeDY(obj.getDY());
     return *this;
   }
   void draw(QPainter*);
   void animate(int i) {
     height += blockh / (i - 1);
   }
+private:
+  int height;
 };
 
 class ChekedBlock : public Block {
@@ -113,23 +146,23 @@ public:
   }
   ~ChekedBlock() {}
   ChekedBlock& operator=(const Block& obj) {
-    color = obj.color;
-    x = obj.x;
-    y = obj.y;
+    this->changeColor(obj.getColor());
+    this->changeX(obj.getX());
+    this->changeY(obj.getY());
     return *this;
   }
   void draw(QPainter* qp) {
     QPen pen;
     pen.setWidth(2);
     qp->setPen(pen);
-    qp->setBrush(color);
-    qp->drawRect(x, y, blockw, blockh);
+    qp->setBrush(getColor());
+    qp->drawRect(getX(), getY(), blockw, blockh);
     pen.setWidth(10);
     qp->setPen(pen);
-    qp->drawLine(x + 5, y + 5, x + blockw - 5, y + 5);
-    qp->drawLine(x + blockw - 5, y + 5, x + blockw - 5, y + blockh - 5);
-    qp->drawLine(x + blockw - 5, y + blockh - 5, x + 5, y + blockh - 5);
-    qp->drawLine(x + 5, y + blockh - 5, x + 5, y + 5);
+    qp->drawLine(getX() + 5, getY() + 5, getX() + blockw - 5, getY() + 5);
+    qp->drawLine(getX() + blockw - 5, getY() + 5, getX() + blockw - 5, getY() + blockh - 5);
+    qp->drawLine(getX() + blockw - 5, getY() + blockh - 5, getX() + 5, getY() + blockh - 5);
+    qp->drawLine(getX() + 5, getY() + blockh - 5, getX() + 5, getY() + 5);
   }
 };
 
@@ -138,10 +171,10 @@ public:
   DeadBlock() {}
   ~DeadBlock() {}
   DeadBlock& operator=(const Block& obj) {
-    dy = obj.dy;
-    x = obj.x;
-    y = obj.y;
-    color = obj.color;
+    this->changeDY(obj.getDY());
+    this->changeX(obj.getX());
+    this->changeY(obj.getY());
+    this->changeColor(obj.getColor());
     return *this;
   }
   bool isDead() {
@@ -152,6 +185,6 @@ public:
     pen.setWidth(2);
     qp->setPen(pen);
     qp->setBrush(QColor("#000000"));
-    qp->drawRect(x, y, blockw, blockh);
+    qp->drawRect(getX(), getY(), blockw, blockh);
   }
 };
