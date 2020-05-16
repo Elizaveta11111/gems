@@ -1,9 +1,6 @@
 #include "Grid.h"
 bool Grid::areNeigbors(int rx, int ry, int tx, int ty) {
-  if ((abs(rx - tx) == 1 && ry == ty) || (abs(ry - ty) == 1 && rx == tx))
-    return true;
-  else
-    return false;
+  return ((abs(rx - tx) == 1 && ry == ty) || (abs(ry - ty) == 1 && rx == tx));
 }
 
 void GridForBlocks::stop() {
