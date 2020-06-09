@@ -48,6 +48,8 @@ public:
   void notbonus(int i, int j);
   void twoColors(int i, int j, QColor color);
   void oneColor(int i, int j);
+  void swap(int col, std::shared_ptr <Block> temp);
+  void moveDown(int row, int col);
   std::shared_ptr <Block> inPos(int i, int j) {
     return grid[i][j + 1];
   }

@@ -21,16 +21,23 @@ void GridForBlocks::fall(int row) {
     for (j = row; j >= 0; j--)
       if (inPos(i, j)->isDead()) {
         std::shared_ptr <Block> temp = inPos(i, j);
-        for (k = j + 1; k > 0; k--)
-          grid[i][k] = grid[i][k - 1];
-        grid[i][0] = temp;
-        alive(i, -1);
-        //grid[i][0]->color = colorColor(rand() % COLORS); //!
-        grid[i][0]->changeColor(colorColor(rand() % COLORS));
-        grid[i][0]->changeY(-blockh);
+        moveDown(i, j);
+        swap(i, temp);
         j = -1;
       }
   stop();
+}
+
+void GridForBlocks::moveDown(int row, int col) {
+  for (int k = col + 1; k > 0; k--)
+    grid[row][k] = grid[row][k - 1];
+}
+
+void GridForBlocks::swap(int col, std::shared_ptr <Block> temp) {
+  grid[col][0] = temp;
+  alive(col, -1);
+  grid[col][0]->changeColor(colorColor(rand() % COLORS));
+  grid[col][0]->changeY(-blockh);
 }
 
 void GridForBlocks::dead(int i, int j) {
