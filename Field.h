@@ -8,8 +8,6 @@ int const wait = 1;
 
 class Field : public QWidget {
 public:
-  //int const blockw = (double)SIZEX / (double)COLUMNS;
-  //int const blockh = (double)SIZEY / (double)ROWS;
   Field(QWidget* parent = 0);
   ~Field() {
     delete bonuses;

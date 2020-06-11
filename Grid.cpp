@@ -1,5 +1,6 @@
 #include "Grid.h"
-bool Grid::areNeigbors(int rx, int ry, int tx, int ty) {
+
+bool Grid::areNeighbors(int rx, int ry, int tx, int ty) {
   return ((abs(rx - tx) == 1 && ry == ty) || (abs(ry - ty) == 1 && rx == tx));
 }
 
@@ -23,7 +24,7 @@ void GridForBlocks::fall(int row) {
         std::shared_ptr <Block> temp = inPos(i, j);
         moveDown(i, j);
         swap(i, temp);
-        j = -1;
+        break;
       }
   stop();
 }
@@ -202,15 +203,15 @@ void GridForBlocks::stopSwap(int iA, int jA, int iB, int jB) {
 
 void GridForBlocks::move(int i, int j) {
   std::shared_ptr <Block> block = inPos(i, j);
-  block->changeX(block->getX() + block->getDX());
-  block->changeY(block->getY() + block->getDY());
+  block->changeX();
+  block->changeY();
 }
 
 GridForBonuses::GridForBonuses() {
   int i, j;
   for (i = 0; i < COLUMNS; i++)
     for (j = 0; j < ROWS; j++)
-      grid[i][j] = -1;
+      grid[i][j] = Bonus::NOTHING;
 }
 
 void GridForBlocks::drawBlock(int i, int j, QPainter* qp) {

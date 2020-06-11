@@ -7,6 +7,11 @@
 #include <QMouseEvent>
 #include <QThread>
 
+enum class BonusType{
+  COLOR,
+  BOMB
+};
+
 void Field::animateFall(int row) {
   int i, j, k;
   for (k = 0; k < blockh/2; k++) {
@@ -21,31 +26,32 @@ void Field::animateFall(int row) {
 }
 
 bool Field::killRow(int row) {
-  int bonus;
+  BonusType bonus;
+  int const probability = 80;
   if (row < 0)
     return false;
   int i, j, k;
-  bool notEmpthy = false;
+  bool notEmpty = false;
   for (i = 0; i < COLUMNS; i++)
     for (j = row; j >= 0; j--)
       if (blocks->inPos(i, j)->isDead()) {
-        bonus = rand() % 80;
-        if (bonus == 1) {
+        bonus = static_cast<BonusType>(rand() % probability);
+        if (bonus == BonusType::COLOR) {
           colorBonus(i, j);
           animateBonus(i, j);
         }
-        if (bonus == 2) {
+        if (bonus == BonusType::BOMB) {
           bombBonus(i, j);
           animateBonus(i, j);
         }
         for (k = -1; k <= j; k++) 
           blocks->changedy(i, k);
-        notEmpthy = true;
-        j = -1;
+        notEmpty = true;
+        break;
       }
-  if (notEmpthy)
+  if (notEmpty)
     animateFall(row);
-  return notEmpthy;
+  return notEmpty;
 }
 
 void Field::swapBlocks(int iA, int jA, int iB, int jB) {
@@ -70,7 +76,7 @@ void Field::mousePressEvent(QMouseEvent* e) {
       pickedX = i;
       pickedY = j;
     }
-    else if (blocks->areNeigbors(i, j, pickedX, pickedY)) {
+    else if (blocks->areNeighbors(i, j, pickedX, pickedY)) {
       int dead = 0;
       blocks->unpickBlock(pickedX, pickedY);
       swapBlocks(i, j, pickedX, pickedY);
@@ -133,12 +139,13 @@ void Field::paintEvent(QPaintEvent* e) {
 }
 
 int randClose(int s, int limit) {
-  int a = s + (rand() - rand()) % 3;
-  if (a < 0)
-    a = -a;
-  if (a > limit)
-    a = a - limit;
-  return a;
+  int const distance = 3;
+  int pos = s + (rand() - rand()) % distance;
+  if (pos < 0)
+    pos = -pos;
+  if (pos > limit)
+    pos = pos - limit;
+  return pos;
 }
 
 void Field::colorBonus(int i, int j) {
@@ -147,30 +154,31 @@ void Field::colorBonus(int i, int j) {
   int sx, sy;
   rx = randClose(i, COLUMNS - 1);
   ry = randClose(j, ROWS - 1);
-  bonuses->setBonus(rx, ry, colorNumber(blocks->inPos(i, j)->getColor()));
+  bonuses->setBonus(rx, ry, static_cast<Bonus>((colorNumber(blocks->inPos(i, j)->getColor()))));
   do {
     tx = rand() % COLUMNS;
     ty = rand() % ROWS;
-  } while (bonuses->areNeigbors(rx, ry, tx, ty));
-  bonuses->setBonus(tx, ty, colorNumber(blocks->inPos(i, j)->getColor()));
+  } while (bonuses->areNeighbors(rx, ry, tx, ty));
+  bonuses->setBonus(tx, ty, static_cast<Bonus>(colorNumber(blocks->inPos(i, j)->getColor())));
   do {
     sx = rand() % COLUMNS;
     sy = rand() % ROWS;
-  } while (bonuses->areNeigbors(sx, sy, tx, ty) || bonuses->areNeigbors(rx, ry, sx, sy));
-  bonuses->setBonus(sx, sy, colorNumber(blocks->inPos(i, j)->getColor()));
+  } while (bonuses->areNeighbors(sx, sy, tx, ty) || bonuses->areNeighbors(rx, ry, sx, sy));
+  bonuses->setBonus(sx, sy, static_cast<Bonus>(colorNumber(blocks->inPos(i, j)->getColor())));
 }
 
 void Field::bombBonus(int i, int j) {
   int rx, ry;
   int s;
+  int const bomsNum = 4;
   rx = randClose(i, COLUMNS - 1);
   ry = randClose(j, ROWS - 1);
-  bonuses->setBonus(rx, ry, -2);
-  for (s = 0; s < 4; ) {
+  bonuses->setBonus(rx, ry, Bonus::BOMB);
+  for (s = 0; s < bomsNum; ) {
     rx = rand() % COLUMNS;
     ry = rand() % ROWS;
-    if (bonuses->inPos(rx, ry == -1)) {
-      bonuses->setBonus(rx, rx, -2);
+    if (bonuses->inPos(rx, ry) == Bonus::NOTHING) {
+      bonuses->setBonus(rx, ry, Bonus::BOMB);
       s++;
     }
   }
@@ -181,15 +189,15 @@ bool Field::doBonuses() {
   bool didSmth = false;
   for (i = 0; i < COLUMNS; i++)
     for (j = 0; j < ROWS; j++) {
-      if (bonuses->inPos(i, j) > 0) {
+      if (bonuses->inPos(i, j) != Bonus::NOTHING && bonuses->inPos(i, j) != Bonus::BOMB) {
         didSmth = true;
-        animateColorChange(i, j, colorColor(bonuses->inPos(i, j)));
-        bonuses->setBonus(i, j, -1);
+        animateColorChange(i, j, colorColor(static_cast<int>(bonuses->inPos(i, j))));
+        bonuses->setBonus(i, j, Bonus::NOTHING);
       }
-      if (bonuses->inPos(i, j) == -2) {
+      if (bonuses->inPos(i, j) == Bonus::BOMB) {
         didSmth = true;
         blocks->dead(i, j);
-        bonuses->setBonus(i, j, -1);
+        bonuses->setBonus(i, j, Bonus::NOTHING);
       }
     }
   return didSmth;
@@ -197,14 +205,15 @@ bool Field::doBonuses() {
 
 void Field::animateBonus(int i, int j) {
   int m;
+  const int steps = 50;
   blocks->bonus(i, j);
-  for (m = 0; m < 50; m++) {
-    blocks->inPos(i, j)->animate(50);
+  for (m = 0; m < steps; m++) {
+    blocks->inPos(i, j)->animate(steps);
     QThread::msleep(2 * wait);
     repaint();
   }
-  for (m = 0; m < 50; m++) {
-    blocks->inPos(i, j)->animate(-50);
+  for (m = 0; m < steps; m++) {
+    blocks->inPos(i, j)->animate(-steps);
     QThread::msleep(2 * wait);
     repaint();
   }
@@ -213,10 +222,12 @@ void Field::animateBonus(int i, int j) {
 
 void Field::animateColorChange(int i, int j, QColor color) {
   int m;
+  const int steps = 50;
+  const int sleepFor = 2;
   blocks->twoColors(i, j, color);
   for (m = 0; m < 50; m++) {
-    blocks->inPos(i, j)->animate(50);
-    QThread::msleep(2);
+    blocks->inPos(i, j)->animate(steps);
+    QThread::msleep(sleepFor);
     repaint();
   }
   blocks->oneColor(i, j);

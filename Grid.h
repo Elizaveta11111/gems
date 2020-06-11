@@ -9,25 +9,36 @@
 #define SIZEY 720
 #define WAIT 1
 
+enum class Bonus {
+  COL0,
+  COL1,
+  COL2,
+  COL3,
+  COL4,
+  COL5,
+  BOMB,
+  NOTHING
+};
+
 class Grid {
 public:
   int const rows = 10;
   int const columns = 12;
-  bool areNeigbors(int rx, int ry, int tx, int ty);
+  bool areNeighbors(int rx, int ry, int tx, int ty);
 };
 
 class GridForBonuses : public Grid {
 public:
   GridForBonuses();
   ~GridForBonuses() {}
-  void setBonus(int i, int j, int bonus) {
+  void setBonus(int i, int j, Bonus bonus) {
     grid[i][j] = bonus;
   }
-  int inPos(int i, int j) {
+  Bonus inPos(int i, int j) {
     return grid[i][j];
   }
 private:
-  int grid[COLUMNS][ROWS];
+  Bonus grid[COLUMNS][ROWS];
 };
 
 class GridForBlocks : public Grid {

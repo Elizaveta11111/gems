@@ -28,11 +28,17 @@ public:
   void changeX(int s) {
     x = s;
   }
+  void changeX() {
+    x = x + dx;
+  }
   int getX() const {
     return x;
   }
   void changeY(int s) {
     y = s;
+  }
+  void changeY() {
+    y = y + dy;
   }
   int getY() const {
     return y;
